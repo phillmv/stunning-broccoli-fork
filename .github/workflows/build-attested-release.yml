@@ -41,3 +41,4 @@ jobs:
           tag: "${{ env.PRODUCT_RELEASE_ID }}"
           artifacts: "${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar.gz"
           body: "${{ env.PRODUCT_NAME }} release ${{ env.PRODUCT_RELEASE_ID }}"
+          makeLatest: true
