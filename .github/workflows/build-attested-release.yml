@@ -1,4 +1,4 @@
-name: Build an attested release
+name: Build an attested release from latest tag
 on:
   workflow_dispatch:
 
@@ -20,25 +20,24 @@ jobs:
           go-version: '^1.22'
       - name: Check out code
         uses: actions/checkout@v4
-      - name: Generate random release identifier
-        run: |
-            echo "PRODUCT_RELEASE_ID=$(uuidgen | cut -d '-' -f 1 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - uses: actions-ecosystem/action-get-latest-tag@b7c32daec3395a9616f88548363a42652b22d435
+        id: get-latest-tag
       - name: Build the binary
         run: |
           GOOS=linux GOARCH=amd64 go build -o ${{ env.PRODUCT_NAME }}-linux-amd64 main.go
           GOOS=darwin GOARCH=arm64 go build -o ${{ env.PRODUCT_NAME }}-darwin-arm64 main.go
       - name: Create the archive
         run: |
-          tar cvf ${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar ${{ env.PRODUCT_NAME }}-*
-          gzip ${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar
+          tar cvf ${{ env.PRODUCT_NAME }}-${{ steps.get-latest-tag.outputs.tag }}.tar ${{ env.PRODUCT_NAME }}-*
+          gzip ${{ env.PRODUCT_NAME }}-${{ steps.get-latest-tag.outputs.tag }}.tar
       - name: Create attestation
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
-          subject-path: "${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar.gz"
+          subject-path: "${{ env.PRODUCT_NAME }}-${{ steps.get-latest-tag.outputs.tag }}.tar.gz"
       - name: Create release with attested artifact attached
         uses: ncipollo/release-action@v1
         with:
-          tag: "${{ env.PRODUCT_RELEASE_ID }}"
-          artifacts: "${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar.gz"
-          body: "${{ env.PRODUCT_NAME }} release ${{ env.PRODUCT_RELEASE_ID }}"
+          tag: "${{ steps.get-latest-tag.outputs.tag }}"
+          artifacts: "${{ env.PRODUCT_NAME }}-${{ steps.get-latest-tag.outputs.tag }}.tar.gz"
+          body: "${{ env.PRODUCT_NAME }} release ${{ steps.get-latest-tag.outputs.tag }}"
           makeLatest: true
