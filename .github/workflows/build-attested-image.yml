@@ -1,0 +1,58 @@
+name: Build an attested image from latest release
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+  packages: write
+
+env:
+  PRODUCT_NAME: ${{ github.event.repository.name }}
+  PRODUCT_REGISTRY: "ghcr.io"
+  PRODUCT_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-attested-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Docker build environment
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to the registry
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20
+        with:
+          registry: ${{ env.PRODUCT_REGISTRY }}
+          username: ${{ env.PRODUCT_OWNER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: robinraju/release-downloader@v1.10
+        id: get-latest-release
+        with:
+          latest: true
+          extract: true
+      - name: Verify attestation for latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RELEASE_FILE=`echo ${{ fromJson(steps.get-latest-release.outputs.downloaded_files)[0] }} | awk -F'/' '{print $NF}'`
+          echo $RELEASE_FILE
+          echo gh attestation verify ./$RELEASE_FILE -o ${{ env.PRODUCT_OWNER }}
+          gh attestation verify ./$RELEASE_FILE -o ${{ env.PRODUCT_OWNER }}
+      - name: Create image and push
+        id: create-image-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: "${{ env.PRODUCT_REGISTRY }}/${{ env.PRODUCT_OWNER }}/${{ env.PRODUCT_NAME }}:${{ steps.get-latest-release.outputs.tag_name }}"
+      - name: Create attestation for container image
+        uses: actions/attest-build-provenance@v1
+        with:
+          # "Do NOT include a tag as part of the image name -- the specific image being attested is identified by the supplied digest."
+          subject-name: "${{ env.PRODUCT_REGISTRY }}/${{ env.PRODUCT_OWNER }}/${{ env.PRODUCT_NAME }}"
+          subject-digest: "${{ steps.create-image-and-push.outputs.digest }}"
+          push-to-registry: true
