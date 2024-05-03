@@ -6,7 +6,11 @@ It also contains [build-attested-release.yml](.github/workflows/build-attested-r
 
 ## Building a release
 
-The workflow is configured as `workflow_dispatch`, so can be triggered manually via GitHub.
+The workflow is configured to build when a new tag is pushed, with something like:
+```
+$ git tag v0.0.1 main -m "release v0.0.1"
+$ git push origin tag v0.0.1
+```
 
 ## Verifying the attestation
 
