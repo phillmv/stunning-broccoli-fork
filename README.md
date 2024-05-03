@@ -6,7 +6,7 @@ It also contains [build-attested-release.yml](.github/workflows/build-attested-r
 
 ## Building a release
 
-A build can be triggered by running the action as a workflow dispatch.
+The workflow is configured as `workflow_dispatch`, so can be triggered manually via GitHub.
 
 ## Verifying the attestation
 
@@ -14,19 +14,26 @@ The release artifact binary can be downloaded and the the attestation verified u
 
 For example:
 ```
-$ curl -sLO https://github.com/finnigja/stunning-broccoli/releases/download/f1350b67/stunning-broccoli-f1350b67.tar.gz
-$ gh attestation verify ./stunning-broccoli-f1350b67.tar.gz -o finnigja
-Loaded digest sha256:394a35508a9e5c154231f267d0f1c61f752b72c2a91c88aa4fe9e052545e3d94 for file://stunning-broccoli-f1350b67.tar.gz
+$ curl -sLO https://github.com/finnigja/stunning-broccoli/releases/download/93e64141/stunning-broccoli-93e64141.tar.gz
+$ gh attestation verify ./stunning-broccoli-93e64141.tar.gz -o finnigja
+Loaded digest sha256:8a1002fc62cbd7e52c5a5889c478fb6085f603e236e547765fa4efeaf90a02eb for file://stunning-broccoli-93e64141.tar.gz
 Loaded 1 attestation from GitHub API
 ✓ Verification succeeded!
 
-sha256:394a35508a9e5c154231f267d0f1c61f752b72c2a91c88aa4fe9e052545e3d94 was attested by:
+sha256:8a1002fc62cbd7e52c5a5889c478fb6085f603e236e547765fa4efeaf90a02eb was attested by:
 REPO                        PREDICATE_TYPE                  WORKFLOW
 finnigja/stunning-broccoli  https://slsa.dev/provenance/v1  .github/workflows/build-attested-release.yml@refs/heads/main
 ```
+
+A JSON-formatted attestation with more detail can be obtained by adding `--format json` to the `gh attestation verify` command.
 
 ## About the attestation feature
 
 For more information about the GitHub artifact attestation feature:
 * https://github.blog/2024-05-02-introducing-artifact-attestations-now-in-public-beta/
 * https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds
+
+## About the stunning broccoli
+
+The fantastic piece of ASCII art packaged here came from [https://emojicombos.com/broccoli-ascii-art](https://emojicombos.com/broccoli-ascii-art).
+

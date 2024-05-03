@@ -29,7 +29,7 @@ jobs:
           GOOS=darwin GOARCH=arm64 go build -o ${{ env.PRODUCT_NAME }}-darwin-arm64 main.go
       - name: Create the archive
         run: |
-          tar cvf ${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar ${{ env.PRODUCT_NAME }}-* README.md
+          tar cvf ${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar ${{ env.PRODUCT_NAME }}-*
           gzip ${{ env.PRODUCT_NAME }}-${{ env.PRODUCT_RELEASE_ID }}.tar
       - name: Create attestation
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
