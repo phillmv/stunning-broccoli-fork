@@ -21,6 +21,8 @@ jobs:
         with:
           latest: true
           extract: true
+      - name: gh version
+        run: echo $(gh version)
       - name: Check filesystem content
         run: |
           pwd
